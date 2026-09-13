@@ -1,0 +1,22 @@
+# Never commit credentials
+.env
+.env.*
+*.pem
+*.key
+secrets.json
+
+# Local editor / OS noise
+.DS_Store
+.vscode/
+.idea/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Local build output
+dist/
+target/
+
+# Anything exported from a live roadmap: these contain real data
+Roadmap-*.html

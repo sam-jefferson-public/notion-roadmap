@@ -1,0 +1,9 @@
+{
+  "name": "notion-roadmap",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Auto-updating swimlane roadmap for the Notion database.",
+  "engines": {
+    "node": ">=18"
+  }
+}

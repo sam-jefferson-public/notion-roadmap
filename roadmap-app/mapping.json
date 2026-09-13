@@ -1,0 +1,61 @@
+{
+  "_comment": "SINGLE SOURCE OF TRUTH for turning a Notion database into the app's stable internal shape. Notion is treated as an untrusted source: when someone renames or retypes a property, you edit THIS file, not code. Point the `notion` values at whatever your own properties are called — nothing else needs to change.",
+
+  "_dataSourceIdNote": "The Notion data source this reads. Replace with your own — see SETUP.md for how to find it. Can also be supplied as the DATA_SOURCE_ID environment variable, which overrides this.",
+  "dataSourceId": "REPLACE_WITH_YOUR_NOTION_DATA_SOURCE_ID",
+  "notionVersion": "2025-09-03",
+
+  "_fieldsNote": "Each entry maps an internal key to a Notion property. `aliases` are tried when the primary name is missing, so a rename in Notion degrades to a warning rather than an outage. Change `notion` to match your own database.",
+  "fields": {
+    "name":      { "notion": "Name",                "type": "title",    "required": true, "aliases": ["Initiative", "Title", "Initiative Name"] },
+    "swimlane":  { "notion": "Swimlane",            "type": "select",   "aliases": ["Lane", "Workstream", "Roadmap Lane", "Category"] },
+    "status":    { "notion": "Status",              "type": "status",   "aliases": ["State"] },
+    "rag":       { "notion": "RAG",                 "type": "select",   "aliases": ["Health", "Status colour", "Status color"] },
+    "baseline":  { "notion": "Committed Date",      "type": "date",     "aliases": ["Baseline", "Committed Date", "Committed delivery"] },
+    "cd":        { "notion": "Delivery Dates",      "type": "date",     "aliases": ["Delivery window", "Delivery Dates"] },
+    "discDates": { "notion": "Discovery Dates",     "type": "date",     "aliases": ["Discovery window", "Discovery date range"] },
+    "discStart": { "notion": "Discovery start",     "type": "date",     "aliases": ["Discovery Start"] },
+    "ipStart":   { "notion": "In Progress start",   "type": "date",     "aliases": ["In Progress Start", "Delivery start"] },
+    "done":      { "notion": "Done date",           "type": "date",     "aliases": ["Done", "Completed date", "Delivered date"] },
+    "desc":      { "notion": "Description",         "type": "text",     "aliases": ["Summary", "About"] },
+    "update":    { "notion": "Latest Update",       "type": "text",     "aliases": ["Update", "Status update", "Progress update"] },
+    "updateAt":  { "notion": "Update Last Edited",  "type": "date",     "aliases": ["Update last edited", "Last update date"] },
+    "parent":    { "notion": "Parent item",         "type": "relation", "aliases": ["Parent", "Parent initiative"] }
+  },
+
+  "_swimlaneMapNote": "Maps a raw (lowercased) swimlane option to a canonical lane key, so a rename in Notion does not lose initiatives. Exact case-insensitive matches to a lane key below are handled automatically; only list genuine synonyms here.",
+  "swimlaneMap": {
+    "growth": "Growth",
+    "platform work": "Platform",
+    "foundation": "Foundations",
+    "keep the lights on": "Run"
+  },
+
+  "_ragMapNote": "Maps a raw (lowercased) RAG value to a canonical bucket. Covers emoji and likely text equivalents, so the view survives RAG being retyped from emoji to words.",
+  "ragMap": {
+    "🟢": "green", "green": "green", "on track": "green", "g": "green",
+    "🟠": "amber", "amber": "amber", "at risk": "amber", "a": "amber", "yellow": "amber",
+    "🔴": "red", "red": "red", "off track": "red", "r": "red",
+    "🔵": "blue", "blue": "blue", "complete": "blue", "completed": "blue", "done": "blue"
+  },
+
+  "_excludeStatusNote": "The Swimlane tag is the roadmap's inclusion filter — untagged initiatives never appear, so status does not have to do that job. Only 'Discarded' is dropped outright. Deliberately-tagged Done/Measure items stay visible and drop off once they fall outside the rolling window. Add 'Done'/'Measure' here to hide completed work regardless of window.",
+  "excludeStatus": ["Discarded"],
+  "unmappedLane": "Unmapped",
+
+  "_baselineTrustNote": "A committed date is only a commitment if it was set for THIS initiative. Duplicating a sub-item in Notion copies its committed date, so the copy carries a date it never committed to and would otherwise draw a large, meaningless drift badge. These rules decide when a committed date is NOT trustworthy. The value is never deleted — it is kept, explained on hover, and counted in the data-quality note — but the drift treatment is suppressed. Set a rule to false to stop applying it.",
+  "baselineTrust": {
+    "ignoreBeforeDeliveryStart": true,
+    "ignoreSharedWithParent": true,
+    "ignoreSharedWithSiblings": true
+  },
+
+  "_lanesNote": "Lane order (top-to-bottom), colours and background tints. Echoed into the API payload so the front-end renders lanes from here — one place to change order and colour. 'optional' lanes are only drawn when they contain initiatives. Rename these to match your own swimlane options.",
+  "lanes": [
+    { "key": "Growth",      "color": "#C2255C", "bg": "#FCE7F0" },
+    { "key": "Platform",    "color": "#1F9D57", "bg": "#E6F6EC" },
+    { "key": "Foundations", "color": "#C9740A", "bg": "#FBEEDC" },
+    { "key": "Run",         "color": "#2563C9", "bg": "#E7EFFC", "optional": true },
+    { "key": "Unmapped",    "color": "#6B7280", "bg": "#EEF0F2", "optional": true }
+  ]
+}

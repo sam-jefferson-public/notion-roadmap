@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Product Roadmap</title>
+<style>:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body {
+margin: 0;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+background: #ffffff;
+color: #1f2430;
+font-size: 13px;
+}
+.wrap { padding: 18px 20px 40px; }
+.head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+.head h1 { font-size: 19px; margin: 0 0 4px; letter-spacing:-0.2px; }
+.head .sub { color:#6b7280; font-size:12.5px; max-width:640px; line-height:1.45; }
+.badges { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.badge { font-size:11px; padding:4px 9px; border-radius:20px; font-weight:600; white-space:nowrap; }
+.badge.snap { background:#FEF3C7; color:#92600A; }
+.badge.live { background:#DCFCE7; color:#166534; }
+.badge.err  { background:#FEE2E2; color:#991B1B; }
+.stamp { font-size:10.5px; color:#9aa1ac; }
+/* build id: makes "am I looking at the current version?" answerable at a glance */
+.build { font-size:10px; color:#c2c8d0; font-variant-numeric:tabular-nums; }
+.legend { display:flex; gap:14px; flex-wrap:wrap; margin:0 0 16px; font-size:11.5px; color:#4b5563; align-items:center; }
+/* section headings: How to use the roadmap / Key / More information */
+.sec { font-size:12.5px; font-weight:700; color:#1f2430; margin:15px 0 7px; }
+.howto { font-size:12px; color:#4b5563; line-height:1.6; margin:0 0 2px; padding-left:18px; max-width:840px; }
+.howto li { margin:3px 0; }
+.howto b { color:#374151; font-weight:600; }
+.sec-sub { font-size:11.5px; color:#6b7280; margin:0 0 8px; max-width:840px; line-height:1.5; }
+.legend .item { display:flex; align-items:center; gap:5px; }
+.dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
+.board { position:relative; overflow-x:auto; border:1px solid #eceef1; border-radius:10px; }
+.grid { position:relative; min-width:1180px; }
+/* header rows */
+.qrow, .mrow { display:flex; }
+.corner { width:var(--label-w); flex:0 0 var(--label-w); }
+.qcells, .mcells { display:flex; flex:1; }
+.qcell { text-align:center; font-weight:700; font-size:12px; padding:7px 0; color:#374151; border-left:1px solid #eceef1; }
+.mcell { text-align:center; font-size:10.5px; padding:5px 0; color:#6b7280; border-left:1px solid #f0f2f4; text-transform:uppercase; letter-spacing:.4px; }
+/* lanes */
+.lane { display:flex; border-top:1px solid #eceef1; position:relative; z-index:1; }
+.lane-label { width:var(--label-w); flex:0 0 var(--label-w); display:flex; align-items:center; justify-content:center; padding:8px; }
+.lane-label span { writing-mode:vertical-rl; transform:rotate(180deg); font-weight:700; font-size:12px; letter-spacing:.3px; padding:10px 5px; border-radius:8px; text-align:center; }
+.lane-track { flex:1; position:relative; }
+.lane-empty { color:#c2c8d0; font-size:11px; font-style:italic; position:absolute; left:12px; top:50%; transform:translateY(-50%); }
+/* full-height layers drawn once across all lanes (not per-lane) so the tint bands,
+month dividers and today line stay continuous down to the top of the sprint axis */
+.lanes-wrap { position:relative; z-index:0; }
+.cols { position:absolute; left:var(--label-w); right:0; top:0; bottom:0; z-index:0; pointer-events:none; }
+.col { position:absolute; top:0; bottom:0; border-left:1px solid #f0f2f4; }
+.today-layer { position:absolute; left:var(--label-w); right:0; top:0; bottom:0; z-index:6; pointer-events:none; }
+.bar {
+position:absolute; height:40px; border:1px solid #d4dae1; border-radius:7px;
+overflow:hidden; box-shadow:0 1px 2px rgba(16,24,40,.06); cursor:pointer; background:#fff;
+}
+/* a sub-item ("Parent item" in Notion): shorter and lighter, sitting under its parent's row */
+.bar.sub { height:32px; border-color:#dfe4ea; box-shadow:0 1px 1px rgba(16,24,40,.05); }
+/* family connector: parent → sub-items. Behind the bars, never over them. */
+.fam-spine { position:absolute; width:0; border-left:1px solid #C6CDD6; z-index:0; }
+.fam-elbow { position:absolute; height:0; border-top:1px solid #C6CDD6; z-index:0; }
+.bar.shifted { border-style:dashed; border-width:1.5px; }   /* light persistent cue: dates have moved */
+.seg { position:absolute; top:0; bottom:0; }
+.seg.disc {
+background-image: repeating-linear-gradient(45deg,#E9EDF2 0,#E9EDF2 5px,#DCE2EA 5px,#DCE2EA 10px);
+}
+.seg.disc.open { -webkit-mask-image:linear-gradient(to right,#000 55%,transparent 100%); mask-image:linear-gradient(to right,#000 55%,transparent 100%); }
+.seg.deliv { border-left:3px solid #9AA3AD; }
+/* No end date in the data: fade the block out so it can't be read as a delivery
+window that was never set. The ◇ still marks the committed date itself. */
+.seg.deliv.open { -webkit-mask-image:linear-gradient(to right,#000 45%,transparent 100%); mask-image:linear-gradient(to right,#000 45%,transparent 100%); }
+.blabel {
+position:absolute; left:4px; top:50%; transform:translateY(-50%); z-index:3;
+background:rgba(255,255,255,.86); border-radius:5px; padding:2px 7px;
+font-size:11px; font-weight:600; line-height:1.1; max-width:calc(100% - 8px);
+white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+display:flex; align-items:center; gap:5px;
+}
+/* timeline-change layer: committed-date marker, drift tail and ±days badge.
+Hidden by default; wireBars() reveals the set for a bar on hover. */
+.bl-ov { position:absolute; opacity:0; transition:opacity .12s ease; pointer-events:none; z-index:4; }
+.bl-ov.show { opacity:1; }
+.bl-tail { height:0; }
+.bl-pin { width:0; transform:translateX(-1px); }
+.bl-dia { width:9px; height:9px; background:#fff; border:2px solid #C77B27; transform:translateX(-50%) rotate(45deg); border-radius:1px; }
+.bl-badge { font-size:9.5px; font-weight:700; padding:1px 6px; border-radius:9px; white-space:nowrap; transform:translate(-50%,0); box-shadow:0 1px 2px rgba(16,24,40,.14); }
+.bl-badge.late { background:#FBE7D5; color:#8A4B12; }
+.bl-badge.early { background:#D8F0E6; color:#12694A; }
+.bl-ok { width:7px; height:7px; background:#fff; border:1.5px solid #9AA3AD; transform:translateX(-50%) rotate(45deg); border-radius:1px; }
+.legend-group { display:flex; gap:13px; align-items:center; flex-wrap:wrap; }
+.legend-group + .legend-group { border-left:1px solid #e5e7eb; padding-left:14px; }
+.legend-group .lbl { font-weight:700; color:#374151; font-size:11px; }
+.sw { width:20px; height:11px; border-radius:3px; display:inline-block; vertical-align:middle; }
+.sw.disc { background-image:repeating-linear-gradient(45deg,#E9EDF2 0,#E9EDF2 3px,#DCE2EA 3px,#DCE2EA 6px); border:1px solid #d4dae1; }
+.sw.deliv { background:#E4F5EC; border-left:3px solid #3BA776; }
+.sw.open { background:#E4F5EC; border-left:3px solid #3BA776; -webkit-mask-image:linear-gradient(to right,#000 45%,transparent 100%); mask-image:linear-gradient(to right,#000 45%,transparent 100%); }
+.sw.dia { width:9px; height:9px; border-radius:1px; background:#fff; border:1.5px solid #9AA3AD; transform:rotate(45deg); }
+.sw.dia.moved { border-color:#C77B27; }
+.today { position:absolute; top:0; bottom:0; width:2px; background:#17B26A; z-index:5; }
+.srow { display:flex; border-top:1px solid #eceef1; background:#fafbfc; }
+.scells { flex:1; position:relative; height:26px; }
+.scell { position:absolute; top:0; bottom:0; border-left:1px solid #eceef1; font-size:9px; color:#98a1ad; display:flex; align-items:center; justify-content:center; }
+.warn { margin:2px 0 12px; background:#FEF3C7; border:1px solid #FADF9A; border-radius:8px; padding:8px 12px; font-size:11.5px; color:#8A5A08; line-height:1.5; }
+.warn .whd { font-weight:700; }
+.warn ul { margin:4px 0 0; padding-left:18px; }
+.warn li { margin:2px 0; }
+.foot { margin-top:12px; font-size:11px; color:#8a909a; line-height:1.5; }
+.foot code { background:#f3f4f6; padding:1px 5px; border-radius:4px; font-size:10.5px; }
+/* "Still measuring": initiatives that shipped but have not been closed out. Ordered
+oldest first, because the point is to prompt someone to finish them. */
+.ms { border-top:1px solid #eceef1; }
+.ms-row { display:grid; grid-template-columns:11px 1fr auto auto; gap:10px; align-items:center;
+padding:8px 2px; border-bottom:1px solid #f4f5f7; font-size:11.5px; cursor:pointer; }
+.ms-row:hover { background:#fafbfc; }
+.ms-name { color:#1f2430; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ms-lane { font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; white-space:nowrap; }
+.ms-age { font-size:10.5px; color:#6b7280; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.ms-age.stale { color:#B4541F; font-weight:600; }
+.ms-none { font-size:11.5px; color:#6b7280; padding:9px 2px; }
+.foot ul { margin:0; padding-left:18px; }
+.foot li { margin:4px 0; }
+.foot b { color:#4b5563; font-weight:600; }
+.foot .dq { margin-top:9px; padding-top:8px; border-top:1px solid #eceef1; }
+/* hover card: the initiative's dates and its written Latest Update, so the roadmap reads
+as a briefing rather than just a shape */
+.hcard {
+position:fixed; z-index:60; width:380px; max-width:calc(100vw - 32px);
+background:#fff; border:1px solid #e2e5ea; border-radius:10px;
+box-shadow:0 10px 30px rgba(16,24,40,.14); padding:12px 14px;
+font-size:11.5px; line-height:1.5; color:#374151; display:none;
+}
+/* Opened by CLICK, not hover, so it is interactive: text selects, the update scrolls,
+the Notion link works. The old hover tooltip was pointer-events:none, which made its
+own overflow:auto unreachable. */
+.hcard.show { display:block; }
+.hcard-x {
+position:absolute; top:7px; right:8px; width:20px; height:20px; padding:0; cursor:pointer;
+border:0; border-radius:5px; background:transparent; color:#9aa1ac; font-size:15px; line-height:18px;
+}
+.hcard-x:hover { background:#f2f4f6; color:#4b5563; }
+.hcard h4 { padding-right:20px; }
+.hcard-go { border-top:1px solid #f0f2f4; margin-top:9px; padding-top:8px; }
+.hcard-go a { color:#2563C9; font-weight:600; text-decoration:none; font-size:11px; cursor:pointer; }
+.hcard-go a:hover { text-decoration:underline; }
+.hcard h4 { margin:0 0 6px; font-size:12.5px; color:#1f2430; line-height:1.35; font-weight:700; display:flex; gap:6px; align-items:flex-start; }
+.hcard h4 .dot { flex:0 0 auto; margin-top:4px; }
+.hcard .meta { color:#6b7280; font-size:10.5px; margin:0 0 7px; }
+.hcard .meta b { color:#374151; font-weight:600; }
+.hcard .desc { border-top:1px solid #f0f2f4; padding-top:8px; margin-bottom:8px; color:#374151; }
+.hcard .upd-wrap { border-top:1px solid #f0f2f4; margin-top:9px; padding-top:8px; }
+.hcard .upd-wrap summary {
+cursor:pointer; list-style:none; color:#6b7280; font-size:10.5px; font-weight:600;
+display:flex; align-items:center; gap:5px; user-select:none;
+}
+.hcard .upd-wrap summary::-webkit-details-marker { display:none; }
+.hcard .upd-wrap summary::before { content:"▸"; font-size:9px; color:#9aa1ac; transition:transform .12s; }
+.hcard .upd-wrap[open] summary::before { transform:rotate(90deg); }
+.hcard .upd-wrap summary:hover { color:#374151; }
+.hcard .upd { white-space:pre-wrap; max-height:min(40vh,300px); overflow-y:auto; margin-top:7px; }
+.hcard .none { color:#9aa1ac; font-style:italic; border-top:1px solid #f0f2f4; margin-top:9px; padding-top:8px; font-size:10.5px; }</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Product Roadmap</h1>
+    </div>
+    <div class="badges">
+      <span class="badge" id="src">Loading…</span>
+      <span class="stamp" id="stamp"></span>
+      <span class="build" id="build"></span>
+    </div>
+  </div>
+
+  <div class="sec">How to use the roadmap</div>
+  <ul class="howto">
+    <li>Each bar is one initiative, running left to right through time. It starts with a hatched <b>discovery</b> stretch and continues into a solid <b>delivery</b> block coloured by its RAG status.</li>
+    <li><b>Hover</b> a bar to see whether its dates have moved since they were committed.</li>
+    <li><b>Click</b> a bar to read what the initiative is, when it lands, its latest update, and to open it in Notion.</li>
+    <li>Milestones sit directly beneath the initiative they belong to, joined by a fine line.</li>
+  </ul>
+
+  <div class="sec">Key</div>
+  <div class="legend">
+    <span class="legend-group">
+      <span class="lbl">Phase</span>
+      <span class="item"><span class="sw disc"></span>Discovery</span>
+      <span class="item"><span class="sw deliv"></span>Delivery (colour = RAG)</span>
+      <span class="item"><span class="sw open"></span>No end date set</span>
+    </span>
+    <span class="legend-group">
+      <span class="lbl">On hover</span>
+      <span class="item"><span class="sw dia"></span>Committed date</span>
+      <span class="item"><span class="sw dia moved"></span>Moved 14+ days</span>
+    </span>
+    <span class="legend-group">
+      <span class="lbl">RAG</span>
+      <span class="item"><span class="dot" style="background:#3BA776"></span>On track</span>
+      <span class="item"><span class="dot" style="background:#E8973A"></span>At risk</span>
+      <span class="item"><span class="dot" style="background:#E1493B"></span>Off track</span>
+      <span class="item"><span class="dot" style="background:#3B82C4"></span>Complete</span>
+      <span class="item"><span class="dot" style="background:#9AA3AD"></span>Not set</span>
+    </span>
+  </div>
+
+  <div class="warn" id="warn" style="display:none"></div>
+
+  <div class="board"><div class="grid" id="grid"></div></div>
+
+  <div class="sec" id="msHead" style="display:none">Still measuring</div>
+  <p class="sec-sub" id="msSub" style="display:none"></p>
+  <div class="ms" id="ms"></div>
+
+  <div class="sec">More information</div>
+  <div class="foot" id="foot"></div>
+</div>
+
+<!-- bar hover card (dates + Latest Update) -->
+<div class="hcard" id="hcard"></div>
+
+<script>var BUILD = "";                      // rewritten by stamp-build.py at build time
+var API_URL   = "/api/roadmap";         // server-side endpoint that holds the Notion token
+var MONTHS_BACK  = 1;
+var MONTHS_AHEAD = 6;
+var NUM_MONTHS   = MONTHS_BACK + MONTHS_AHEAD;
+var MEASURE_LOOKBACK_MONTHS = 6;        // how far back the "still measuring" list looks
+var _now = new Date();
+var TL_START = Date.UTC(_now.getUTCFullYear(), _now.getUTCMonth()-MONTHS_BACK, 1);
+var TL_END   = Date.UTC(_now.getUTCFullYear(), _now.getUTCMonth()+MONTHS_AHEAD, 1) - 864e5;
+var TODAY    = Date.UTC(_now.getUTCFullYear(), _now.getUTCMonth(), _now.getUTCDate());
+var LABEL_W  = 116;
+var ROW_H    = 48;
+var LANES = [
+{key:"Growth",  color:"#C2255C", bg:"#FCE7F0"},
+{key:"Platform", color:"#1F9D57", bg:"#E6F6EC"},
+{key:"Foundations",      color:"#C9740A", bg:"#FBEEDC"},
+{key:"Run",      color:"#2563C9", bg:"#E7EFFC", optional:true},
+{key:"Unmapped",       color:"#6B7280", bg:"#EEF0F2", optional:true}
+];
+var SNAPSHOT = (function(){
+var d0 = new Date();
+function day(offset){                     // ISO date, `offset` days from today
+var d = new Date(Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth(), d0.getUTCDate() + offset));
+return d.toISOString().slice(0,10);
+}
+function row(o){
+return {
+"Initiative Name": o.name, swimlane: o.lane, Status: o.status || "In Progress",
+RAG: o.rag === undefined ? "green" : o.rag,
+id: o.id, parent_id: o.parent || null,
+disc_start: o.disc ? day(o.disc[0]) : null,
+disc_end:   o.disc && o.disc[1] != null ? day(o.disc[1]) : null,
+ip_start:   o.ip != null ? day(o.ip) : null,
+cd_start:   o.cd ? day(o.cd[0]) : null,
+cd_end:     o.cd && o.cd[1] != null ? day(o.cd[1]) : null,
+baseline:   o.committed != null ? day(o.committed) : null,
+baseline_ignored: o.ignored || null,
+description: o.desc || null,
+update: o.update || null,
+update_at: o.updateAt != null ? day(o.updateAt) : null,
+done_date: o.done != null ? day(o.done) : null,
+url: null
+};
+}
+return [
+row({ id:"p1", lane:"Growth", name:"Unified product pages", status:"In Progress",
+disc:[-40,5], cd:[5,75], committed:75,
+desc:"Bring the three legacy product page templates onto one component set, so a change ships once instead of three times.",
+update:"Component library agreed and the first template is behind a flag in staging. Two teams are blocked on the shared header, which lands next week.",
+updateAt:-3 }),
+row({ id:"m1", parent:"p1", lane:"Growth", name:"Milestone 1: Search results redesign",
+status:"Measure", cd:[-25,2], ip:-25, done:-1,
+desc:"Rebuild the results grid on the new component set and measure the effect on click-through.",
+update:"Shipped to 100% on Tuesday. Early numbers look flat, which is the expected outcome for a like-for-like rebuild.",
+updateAt:-1 }),
+row({ id:"m2", parent:"p1", lane:"Growth", name:"Milestone 2: Filters and sorting",
+cd:[3,30], ip:3, committed:20,
+desc:"Move filtering and sort onto the shared components and retire the old filter service.",
+update:"On track. The filter service has one remaining consumer to migrate.", updateAt:-2 }),
+row({ id:"m3", parent:"p1", lane:"Growth", name:"Milestone 3: Personalised ranking",
+status:"Discovery", cd:[32,60], ip:32, committed:20, ignored:"copied-between-sub-items",
+desc:"Introduce per-customer ranking on the new results grid." }),
+row({ id:"m4", parent:"p1", lane:"Growth", name:"Milestone 4: Rollout to remaining markets",
+status:"Discovery", cd:[32,60], ip:32, committed:20, ignored:"copied-between-sub-items",
+desc:"Roll the unified pages out to the remaining five markets once ranking is proven." }),
+row({ id:"sub", lane:"Growth", name:"Subscription pricing experiment",
+disc:[-12,10], cd:[10,45], ip:10, committed:20, rag:"amber",
+desc:"Test an annual plan alongside the monthly one to see whether it lifts retention without cannibalising revenue.",
+update:"Slipped three weeks. Billing changes need a migration we had not planned for, and the finance review moved.",
+updateAt:-5 }),
+row({ id:"ref", lane:"Growth", name:"Referral programme", status:"Discovery",
+rag:null, disc:[5,null],
+desc:"Explore whether a referral incentive is worth building. No delivery dates yet." }),
+row({ id:"pay", lane:"Platform", name:"Payments provider migration",
+disc:[-20,15], cd:[15,90], ip:15, rag:"amber", committed:90,
+desc:"Move card processing to a second provider so we are not single-sourced, and reduce per-transaction cost.",
+update:"Sandbox integration is complete. Waiting on a compliance review before we can test with live volume.",
+updateAt:-6 }),
+row({ id:"ds", lane:"Platform", name:"Design system v2",
+cd:[1,50], ip:1,
+desc:"Second version of the component library: design tokens, dark mode, and documentation teams can actually use.",
+update:"Tokens are merged. Dark mode is behind a flag for internal accounts.", updateAt:-4 }),
+row({ id:"srch", lane:"Foundations", name:"Search infrastructure upgrade",
+cd:[-10,40], ip:-10,
+desc:"Replace the ageing search cluster before it runs out of headroom at peak.",
+update:"New cluster is serving 10% of traffic with no regressions.", updateAt:-8 }),
+row({ id:"app", lane:"Foundations", name:"Mobile app 4.0 release",
+cd:[25,null], ip:-5, committed:25, rag:"green",
+desc:"A single release date rather than a delivery window, so the bar fades to show no end date is set.",
+update:"Submitted for review a week ahead of the store deadline.", updateAt:-2 }),
+row({ id:"chk", lane:"Platform", name:"Checkout performance", status:"Measure",
+rag:"blue", cd:[-110,-75], ip:-110, done:-72,
+desc:"Reduce time-to-first-byte on the checkout flow.",
+update:"Shipped. Median load time down 40%. Impact read is outstanding.", updateAt:-70 }),
+row({ id:"eml", lane:"Growth", name:"Email preference centre", status:"Measure",
+rag:"blue", cd:[-90,-55], ip:-90, done:-52,
+desc:"Give customers granular control over what we send them.",
+update:"Shipped. Unsubscribe rate down, but we have not yet reported on it.", updateAt:-50 })
+];
+})();
+function parseDate(s){ if(!s) return null; var d=new Date((s+"").slice(0,10)+"T00:00:00Z"); return isNaN(d)?null:d.getTime(); }
+function asArr(v){ if(!v) return []; if(Array.isArray(v)) return v; try{ var p=JSON.parse(v); return Array.isArray(p)?p:[]; }catch(e){ return []; } }
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+var BARDATA={};  // bar uid -> normalized item, for the detail card
+var DRAWN={};    // initiative ids actually drawn on the chart, for the Measure list
+function ragColor(r){ return r==="green"?"#3BA776":r==="amber"?"#E8973A":r==="red"?"#E1493B":r==="blue"?"#3B82C4":"#9AA3AD"; }
+function ragTint(r){ return r==="green"?"#E4F5EC":r==="amber"?"#FCEFE0":r==="red"?"#FBE5E3":r==="blue"?"#E4EFFA":"#EEF0F2"; }
+function pct(t){ return ((t-TL_START)/(TL_END-TL_START))*100; }
+function clampPct(p){ return Math.max(0, Math.min(100, p)); }
+var DAY=864e5;
+var SLIP_THRESHOLD=14;   // days; a delivery move smaller than this shows nothing
+function fmtShort(t){ var d=new Date(t); return d.getUTCDate()+" "+MNAME[d.getUTCMonth()]; }
+function fmtLong(t){ var d=new Date(t); return d.getUTCDate()+" "+MNAME[d.getUTCMonth()]+" "+d.getUTCFullYear(); }
+function laneFor(row){ return row.swimlane || row["Swimlane"] || null; }
+function normalize(row){
+var disc=parseDate(row.disc_start);
+var discE=parseDate(row.disc_end);
+var ip=parseDate(row.ip_start);
+var cds=parseDate(row.cd_start);
+var cde=parseDate(row.cd_end);
+var delStart = cds || ip || null;
+var delEnd   = cde || cds || null;
+var delOpen = false;
+if(delStart && (!delEnd || delEnd<=delStart)){ delEnd = delStart + 21*DAY; delOpen = true; }
+var segs=[];
+if(disc && delStart && disc < delStart){
+segs.push({phase:"disc", s:disc, e:delStart, realEnd:(discE && discE<delStart)?discE:null});
+segs.push({phase:"deliv", s:delStart, e:delEnd, open:delOpen});
+} else if(delStart){
+segs.push({phase:"deliv", s:delStart, e:delEnd, open:delOpen});
+} else if(disc){
+var e = discE || ip || TODAY, open = !discE;
+if(e <= disc) e = disc + 28*DAY;
+segs.push({phase:"disc", s:disc, e:e, open:open});
+} else {
+return null;
+}
+return {
+name: row["Initiative Name"]||"(untitled)",
+rag: row.RAG||null,
+status: row.Status||"",
+lane: laneFor(row),
+segs: segs,
+start: segs[0].s,
+end: segs[segs.length-1].e,
+baseline: row.baseline_ignored ? null : parseDate(row.baseline),
+baselineRaw: parseDate(row.baseline),
+baselineIgnored: row.baseline_ignored || null,
+landing: (cde || cds || null),   // current committed landing = delivery end (or single date)
+url: row.url || null,
+id: row.id || null,
+parentId: row.parent_id || null,
+description: row.description || null,
+update: row.update || null,
+updateAt: parseDate(row.update_at)
+};
+}
+function layout(items){
+var byId={}, kids={}, families=[], singles=[];
+items.forEach(function(it){ if(it.id) byId[it.id]=it; });
+items.forEach(function(it){
+if(it.parentId && byId[it.parentId] && it.parentId!==it.id) (kids[it.parentId]=kids[it.parentId]||[]).push(it);
+});
+items.forEach(function(it){
+if(it.parentId && byId[it.parentId] && it.parentId!==it.id) return;   // placed under its parent
+(kids[it.id] ? families : singles).push(it);
+});
+var row=0, byStart=function(a,b){return a.start-b.start;};
+families.sort(byStart).forEach(function(p){
+p.row=row++; p.depth=0;
+kids[p.id].sort(byStart).forEach(function(c){ c.row=row++; c.depth=1; });
+});
+var ends=[];
+singles.sort(byStart).forEach(function(it){
+it.depth=0;
+var placed=false;
+for(var i=0;i<ends.length;i++){
+if(ends[i]<=it.start-2*DAY){ it.row=row+i; ends[i]=it.end; placed=true; break; }
+}
+if(!placed){ it.row=row+ends.length; ends.push(it.end); }
+});
+return (row+ends.length)||1;
+}
+function monthsList(){
+var out=[], d=new Date(TL_START);
+for(var i=0;i<NUM_MONTHS;i++){ out.push({y:d.getUTCFullYear(),m:d.getUTCMonth()}); d.setUTCMonth(d.getUTCMonth()+1); }
+return out;
+}
+var MNAME=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var QTINT={1:"#F1EEFB",2:"#FCF1E9",3:"#FFFFFF",4:"#FFFFFF"};
+function qOf(m){ return Math.floor(m/3)+1; }
+var SPINE_X = 14;   // px right of the parent bar's leading edge (under its dot)
+function familyHtml(laneItems){
+var pos = {}, html = "";
+laneItems.forEach(function(it){
+if(!it.id) return;
+var vs=Math.max(it.start,TL_START), ve=Math.min(it.end,TL_END);
+if(ve<=vs) return;                       // clipped out of the window — no connector
+pos[it.id] = pct(vs);
+});
+laneItems.forEach(function(p){
+if(p.depth>0 || !p.id || pos[p.id]===undefined) return;
+var kids = laneItems.filter(function(k){ return k.parentId===p.id && pos[k.id]!==undefined; });
+if(!kids.length) return;
+var sx = clampPct(pos[p.id]).toFixed(2)+"% + "+SPINE_X+"px";
+var top = p.row*ROW_H+44;                             // just under the 40px parent bar
+var maxRow = kids[0].row;
+kids.forEach(function(k){ if(k.row>maxRow) maxRow=k.row; });
+var lastY = maxRow*ROW_H+24;                          // centre of the lowest child's row
+if(lastY>top) html+='<div class="fam-spine" style="left:calc('+sx+');top:'+top+'px;height:'+(lastY-top)+'px"></div>';
+kids.forEach(function(k){
+var kx = clampPct(pos[k.id]).toFixed(2)+"%", y = k.row*ROW_H+24;
+html+='<div class="fam-elbow" style="left:min('+kx+','+sx+');'
++'width:calc(max('+kx+','+sx+') - min('+kx+','+sx+'));top:'+y+'px"></div>';
+});
+});
+return html;
+}
+function render(rows){
+var items=rows.map(normalize).filter(Boolean);
+BARDATA={}; DRAWN={};
+var grid=document.getElementById("grid");
+grid.style.setProperty("--label-w", LABEL_W+"px");
+var months=monthsList();
+var colW=100/months.length;
+var qSpans=[]; var cur=null;
+months.forEach(function(mo,i){
+var q=qOf(mo.m);
+if(!cur||cur.q!==q){ cur={q:q,start:i,count:1}; qSpans.push(cur);} else cur.count++;
+});
+var html="";
+html+='<div class="qrow"><div class="corner"></div><div class="qcells">';
+qSpans.forEach(function(q){ html+='<div class="qcell" style="width:'+(q.count*colW)+'%">Q'+q.q+'</div>'; });
+html+='</div></div>';
+html+='<div class="mrow"><div class="corner"></div><div class="mcells">';
+months.forEach(function(mo){ html+='<div class="mcell" style="width:'+colW+'%">'+MNAME[mo.m]+'</div>'; });
+html+='</div></div>';
+var todayPct=pct(TODAY);
+html+='<div class="lanes-wrap">';
+html+='<div class="cols">';
+months.forEach(function(mo,i){
+html+='<div class="col" style="left:'+(i*colW)+'%;width:'+colW+'%;background:'+QTINT[qOf(mo.m)]+'"></div>';
+});
+html+='</div>';
+var barId=0;
+LANES.forEach(function(lane){
+var laneItems=items.filter(function(it){return it.lane===lane.key && it.end>=TL_START && it.start<=TL_END;});
+if(lane.optional && !laneItems.length) return;   // hide optional lanes (Run, Unmapped) when empty
+var nrows=layout(laneItems);
+var h=nrows*ROW_H+8;
+html+='<div class="lane">';
+html+='<div class="lane-label"><span style="background:'+lane.bg+';color:'+lane.color+'">'+lane.key+'</span></div>';
+html+='<div class="lane-track" style="height:'+h+'px">';
+html+=familyHtml(laneItems);   // behind the bars: parent → sub-item connectors
+laneItems.forEach(function(it){
+var visS=Math.max(it.start,TL_START), visE=Math.min(it.end,TL_END);
+if(visE<=visS) return;
+var spanVis=Math.max(visE-visS,1);
+var l=pct(visS), w=Math.max(pct(visE)-l,2.5);
+var kid=it.depth>0, barH=kid?32:40, top=it.row*ROW_H+(kid?8:4);
+var col=ragColor(it.rag);
+var dd=null, shifted=false;
+if(it.baseline && it.landing){ dd=Math.round((it.landing-it.baseline)/DAY); shifted=Math.abs(dd)>=SLIP_THRESHOLD; }
+var uid=barId++;
+BARDATA[uid]=it;
+if(it.id) DRAWN[it.id]=true;
+var urlAttr=(it.url||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+var segHtml="";
+it.segs.forEach(function(sg){
+var sgS=Math.max(sg.s,visS), sgE=Math.min(sg.e,visE);
+if(sgE<=sgS) return;
+var li=(sgS-visS)/spanVis*100, wi=(sgE-sgS)/spanVis*100;
+if(sg.phase==="disc"){
+segHtml+='<div class="seg disc'+(sg.open?' open':'')+'" style="left:'+li+'%;width:'+wi+'%"></div>';
+} else {
+segHtml+='<div class="seg deliv'+(sg.open?' open':'')+'" style="left:'+li+'%;width:'+wi+'%;background:'+ragTint(it.rag)+';border-left-color:'+col+'"></div>';
+}
+});
+html+='<div class="bar'+(shifted?' shifted':'')+(kid?' sub':'')+'" data-b="'+uid+'"'+(it.url?' data-url="'+urlAttr+'"':'')
++' style="left:'+l+'%;width:'+w+'%;top:'+top+'px">'
++segHtml
++'<div class="blabel"><span class="dot" style="background:'+col+'"></span>'
++esc(it.name)+'</div>'
++'</div>';
+if(it.baseline && it.landing){
+var basePct=clampPct(pct(it.baseline)), landPct=clampPct(pct(it.landing));
+if(shifted){
+var sc=dd>0?'#C77B27':'#1B8F6A';
+var x1=Math.min(basePct,landPct), x2=Math.max(basePct,landPct);
+html+='<div class="bl-ov bl-tail" data-b="'+uid+'" style="left:'+x1+'%;width:'+(x2-x1)+'%;top:'+(top-4)+'px;border-top:2px dashed '+sc+'"></div>'
++'<div class="bl-ov bl-pin" data-b="'+uid+'" style="left:'+basePct+'%;top:'+top+'px;height:'+barH+'px;border-left:2px dashed '+sc+'"></div>'
++'<div class="bl-ov bl-dia" data-b="'+uid+'" style="left:'+basePct+'%;top:'+(top-6)+'px;border-color:'+sc+'"></div>'
++'<div class="bl-ov bl-badge '+(dd>0?'late':'early')+'" data-b="'+uid+'" style="left:'+landPct+'%;top:'+(top-10)+'px">'+(dd>0?'+':'−')+Math.abs(dd)+'d</div>';
+} else {
+html+='<div class="bl-ov bl-ok" data-b="'+uid+'" style="left:'+basePct+'%;top:'+(top+barH/2-4)+'px"></div>';
+}
+}
+});
+if(!laneItems.length) html+='<div class="lane-empty">No initiatives in this lane within the window</div>';
+html+='</div></div>';
+});
+if(todayPct>=0&&todayPct<=100) html+='<div class="today-layer"><div class="today" style="left:'+todayPct+'%"></div></div>';
+html+='</div>'; // close .lanes-wrap
+html+='<div class="srow"><div class="corner"></div><div class="scells">';
+var sprintLen=14*DAY, t=TL_START;
+var startYear=new Date(TL_START).getUTCFullYear();
+var n=Math.floor((TL_START-Date.UTC(startYear,0,1))/sprintLen)+1;
+while(t<TL_END){
+var l=pct(t), w=(sprintLen/(TL_END-TL_START))*100;
+var d=new Date(t);
+if(d.getUTCMonth()===0 && d.getUTCDate()<=14) n=1;
+html+='<div class="scell" style="left:'+l+'%;width:'+w+'%">S'+n+'</div>';
+t+=sprintLen; n++;
+}
+html+='</div></div>';
+grid.innerHTML=html;
+wireBars();
+var noRag=items.filter(function(i){return !i.rag;}).length;
+var mLabel=MNAME[new Date(TL_START).getUTCMonth()]+" "+new Date(TL_START).getUTCFullYear()
++" – "+MNAME[new Date(TL_END).getUTCMonth()]+" "+new Date(TL_END).getUTCFullYear();
+var nSub=items.filter(function(i){return i.depth>0;}).length;
+var nBl=items.filter(function(i){return i.baselineIgnored;}).length;
+var dq=[];
+if(nBl>0)   dq.push("<b>"+nBl+"</b> "+(nBl===1?"initiative carries":"initiatives carry")
++" a Committed Date that looks copied rather than committed, so "
++(nBl===1?"its":"their")+" drift marker is suppressed. Hover to see why. Clearing or setting the date in Notion restores it.");
+if(noRag>0) dq.push("<b>"+noRag+"</b> shown "+(noRag===1?"initiative has":"initiatives have")+" no RAG set.");
+document.getElementById("foot").innerHTML=
+"<ul>"
++"<li><b>Where the data comes from.</b> The roadmap database in Notion, read fresh every time this page loads. Teams carry on editing as normal and this view keeps up.</li>"
++"<li><b>What appears.</b> Lanes come from the <code>Swimlane</code> field. Only tagged initiatives are shown, so tagging is how work gets onto the roadmap.</li>"
++"<li><b>The window.</b> One month back and "+MONTHS_AHEAD+" forward, currently <b>"+mLabel+"</b>. The month behind keeps work that has just shipped from vanishing days later. Anything outside is hidden, and anything still in Measure is listed above.</li>"
++"<li><b>How a bar is built.</b> From the Discovery Dates, Discovery start, In Progress start and Delivery Dates fields. A faded end means no end date is set, so the date shown is a launch rather than a delivery window.</li>"
++"<li><b>The committed date.</b> The ◇ on hover marks the Committed Date. It always sits on the committed date itself, which is the far end of a bar with a delivery window and the near end of one with no end date.</li>"
++"<li><b>What the card shows.</b> The description is an AI summary Notion keeps up to date from the initiative's page. The Latest Update is written by the team.</li>"
++"</ul>"
++(dq.length ? "<div class=\"dq\"><b>Data quality to watch</b><ul><li>"+dq.join("</li><li>")+"</li></ul></div>" : "");
+}
+var BL_REASON={
+"precedes-delivery-start":"it falls before this initiative's own delivery starts",
+"copied-from-parent":"it is the parent initiative's date",
+"copied-between-sub-items":"other sub-items carry the same date, so it was likely copied"
+};
+var MEASURE_STALE_WEEKS = 8;
+function renderMeasuring(rows){
+var head=document.getElementById("msHead"), sub=document.getElementById("msSub"),
+box=document.getElementById("ms");
+if(!head || !box) return;
+var cutoff = Date.UTC(_now.getUTCFullYear(), _now.getUTCMonth()-MEASURE_LOOKBACK_MONTHS, 1);
+var out=[];
+(rows||[]).forEach(function(row){
+if((row.Status||"") !== "Measure") return;
+if(row.id && DRAWN[row.id]) return;              // already on the chart above
+var d = parseDate(row.done_date);
+if(d && d < cutoff) return;                      // older than the lookback
+out.push({row:row, done:d});
+});
+out.sort(function(a,b){                            // oldest first: the nudge order
+if(a.done && b.done) return a.done - b.done;
+return a.done ? -1 : (b.done ? 1 : 0);
+});
+if(!out.length){ head.style.display="none"; sub.style.display="none"; box.innerHTML=""; return; }
+var laneOf={}; LANES.forEach(function(l){ laneOf[l.key]=l; });
+var html="";
+out.forEach(function(o){
+var r=o.row, lane=laneOf[laneFor(r)] || {color:"#6B7280", bg:"#EEF0F2"};
+var weeks = o.done ? Math.max(0, Math.round((TODAY-o.done)/(7*864e5))) : null;
+var age = weeks===null ? "no Done date set"
+: weeks===0 ? "closed this week"
+: weeks + (weeks===1 ? " week" : " weeks") + " in Measure";
+var stale = weeks!==null && weeks >= MEASURE_STALE_WEEKS;
+var urlAttr=(r.url||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;");
+html+='<div class="ms-row"'+(r.url?' data-url="'+urlAttr+'"':'')+'>'
++'<span class="dot" style="background:'+ragColor(r.RAG)+'"></span>'
++'<span class="ms-name">'+esc(r["Initiative Name"]||"(untitled)")+'</span>'
++'<span class="ms-lane" style="background:'+lane.bg+';color:'+lane.color+'">'+esc(laneFor(r)||"")+'</span>'
++'<span class="ms-age'+(stale?" stale":"")+'">'+esc(age)+'</span>'
++'</div>';
+});
+box.innerHTML=html;
+head.style.display="";
+sub.style.display="";
+sub.textContent = out.length===1
+? "One initiative has shipped but is still marked Measure, and is no longer on the chart above. Close it out in Notion once the impact has been read."
+: out.length + " initiatives have shipped but are still marked Measure, and are no longer on the chart above. Close them out in Notion once the impact has been read.";
+var rowsEl=box.querySelectorAll(".ms-row");
+for(var i=0;i<rowsEl.length;i++){
+(function(el){
+var u=el.getAttribute("data-url");
+if(u) el.addEventListener("click", function(){ openInNotion(u); });
+})(rowsEl[i]);
+}
+}
+function cardHtml(it){
+var h='<button class="hcard-x" type="button" data-x="1" aria-label="Close">\u00d7</button>';
+h+='<h4><span class="dot" style="background:'+ragColor(it.rag)+'"></span><span>'+esc(it.name)+'</span></h4>';
+var head=[];
+if(it.lane) head.push('<b>'+esc(it.lane)+'</b>');
+if(it.status) head.push(esc(it.status));
+if(it.depth>0) head.push("sub-item");
+if(head.length) h+='<div class="meta">'+head.join(" · ")+'</div>';
+if(it.description) h+='<div class="desc">'+esc(it.description)+'</div>';
+var lines=[];
+it.segs.forEach(function(sg){
+var end = sg.open ? (sg.phase==="disc" ? "ongoing" : "no end date set")
+: fmtShort(sg.realEnd || sg.e);
+lines.push((sg.phase==="disc"?"Discovery":"Delivery")+" "+fmtShort(sg.s)+" – "+end);
+});
+if(it.baseline && it.landing){
+var dd=Math.round((it.landing-it.baseline)/DAY);
+lines.push("Committed "+fmtShort(it.baseline)+" · now "+fmtShort(it.landing)
++" ("+(dd>0?"+":dd<0?"−":"±")+Math.abs(dd)+"d)");
+} else if(it.baselineIgnored && it.baselineRaw){
+lines.push("Baseline "+fmtShort(it.baselineRaw)+" is not treated as a commitment. "
++(BL_REASON[it.baselineIgnored]||"it doesn't look like this initiative's own date")+".");
+}
+h+='<div class="meta">'+lines.map(esc).join("<br>")+'</div>';
+if(it.update){
+h+='<details class="upd-wrap"><summary>Latest update'
++(it.updateAt ? ' · '+esc(fmtLong(it.updateAt)) : '')+'</summary>'
++'<div class="upd">'+esc(it.update)+'</div></details>';
+} else {
+h+='<div class="upd none">No update written yet.</div>';
+}
+if(it.url) h+='<div class="hcard-go"><a href="'+esc(it.url).replace(/"/g,"&quot;")
++'" target="_blank" rel="noopener noreferrer" data-go="1">Open in Notion \u2197</a></div>';
+return h;
+}
+function placeCard(ev){
+var c=document.getElementById("hcard"), pad=14;
+var w=c.offsetWidth, h=c.offsetHeight;
+var x=ev.clientX+pad, y=ev.clientY+pad;
+if(x+w > window.innerWidth-8)  x=ev.clientX-w-pad;
+if(y+h > window.innerHeight-8) y=ev.clientY-h-pad;
+c.style.left=Math.max(8,x)+"px";
+c.style.top =Math.max(8,y)+"px";
+}
+function openCard(it, ev){
+var c=document.getElementById("hcard");
+CARD_ITEM=it;
+c.innerHTML=cardHtml(it);
+c.classList.add("show");
+placeCard(ev);
+}
+function hideCard(){
+CARD_ITEM=null;
+document.getElementById("hcard").classList.remove("show");
+}
+var CARD_ITEM=null;
+document.addEventListener("keydown", function(e){ if(e.key==="Escape") hideCard(); });
+document.addEventListener("click", function(e){
+var c=document.getElementById("hcard");
+if(!c || !c.classList.contains("show")) return;
+if(c.contains(e.target)){
+if(e.target.getAttribute("data-x")) hideCard();
+else if(e.target.getAttribute("data-go") && CARD_ITEM){
+if(window.__TAURI__ && window.__TAURI__.core){ e.preventDefault(); openInNotion(CARD_ITEM.url); }
+}
+return;
+}
+if(!e.target.closest || !e.target.closest(".bar")) hideCard();
+});
+function wireBars(){
+var grid=document.getElementById("grid");
+var bars=grid.querySelectorAll(".bar");
+for(var i=0;i<bars.length;i++){
+(function(bar){
+var id=bar.getAttribute("data-b");
+var ovs=grid.querySelectorAll('.bl-ov[data-b="'+id+'"]');
+bar.addEventListener("mouseenter",function(){ for(var j=0;j<ovs.length;j++) ovs[j].classList.add("show"); });
+bar.addEventListener("mouseleave",function(){ for(var j=0;j<ovs.length;j++) ovs[j].classList.remove("show"); });
+bar.addEventListener("click",function(ev){
+var it=BARDATA[id];
+if(it) openCard(it, ev);
+});
+})(bars[i]);
+}
+}
+function openInNotion(url){
+if(!url) return;
+if(window.__TAURI__ && window.__TAURI__.core){ window.__TAURI__.core.invoke("open_external",{url:url}); }
+else { window.open(url,"_blank","noopener"); }
+}
+function setStamp(iso, prefix){
+if(!iso) return;
+var d=new Date(iso);
+document.getElementById("stamp").textContent=(prefix||"updated")+" "+d.toLocaleString();
+}
+function showWarnings(list){
+var el=document.getElementById("warn");
+if(!list || !list.length){ el.style.display="none"; el.innerHTML=""; return; }
+var esc=function(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); };
+el.style.display="block";
+el.innerHTML='<span class="whd">Heads up: the roadmap still loaded, but some Notion data didn’t map cleanly.</span>'
++'<ul>'+list.map(function(w){ return '<li>'+esc(w)+'</li>'; }).join("")+'</ul>';
+}
+function usePreview(reason){
+var b=document.getElementById("src");
+b.className="badge snap"; b.textContent="Preview data";
+showWarnings(null);
+console.log("Preview fallback: "+reason);
+render(SNAPSHOT);
+renderMeasuring(SNAPSHOT);
+}
+function boot(){
+fetch(API_URL,{headers:{accept:"application/json"}})
+.then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+.then(function(payload){
+if(!payload || !payload.results){ usePreview("no payload"); return; }
+if(payload.lanes && payload.lanes.length) LANES = payload.lanes;
+var b=document.getElementById("src");
+if(payload.stale){ b.className="badge snap"; b.textContent="Last good data"; }
+else { b.className="badge live"; b.textContent="Live from Notion"; }
+setStamp(payload.generated_at);
+showWarnings(payload.warnings);
+render(payload.results);
+renderMeasuring(payload.results);
+})
+.catch(function(e){ usePreview(String(e)); });
+}
+/* boot() removed: these pages supply their own data */
+(function(){ var b=document.getElementById("build"); if(b) b.textContent=BUILD; })();</script>
+
+<script>/* Generated by roadmap-claude/build-template.py. Do not edit by hand.
+The adapter below is the same code the web and desktop apps run, so these pages
+canonicalise RAG, apply the swimlane filter and excludeStatus, link sub-items and
+judge baselines exactly as they do. */
+var ADAPTER = (function(){
+var module = { exports: {} };
+var process = { env: {} };
+var MAPPING = {
+"_comment": "SINGLE SOURCE OF TRUTH for turning a Notion database into the app's stable internal shape. Notion is treated as an untrusted source: when someone renames or retypes a property, you edit THIS file, not code. Point the `notion` values at whatever your own properties are called — nothing else needs to change.",
+"_dataSourceIdNote": "The Notion data source this reads. Replace with your own — see SETUP.md for how to find it. Can also be supplied as the DATA_SOURCE_ID environment variable, which overrides this.",
+"dataSourceId": "REPLACE_WITH_YOUR_NOTION_DATA_SOURCE_ID",
+"notionVersion": "2025-09-03",
+"_fieldsNote": "Each entry maps an internal key to a Notion property. `aliases` are tried when the primary name is missing, so a rename in Notion degrades to a warning rather than an outage. Change `notion` to match your own database.",
+"fields": {
+"name":      { "notion": "Name",                "type": "title",    "required": true, "aliases": ["Initiative", "Title", "Initiative Name"] },
+"swimlane":  { "notion": "Swimlane",            "type": "select",   "aliases": ["Lane", "Workstream", "Roadmap Lane", "Category"] },
+"status":    { "notion": "Status",              "type": "status",   "aliases": ["State"] },
+"rag":       { "notion": "RAG",                 "type": "select",   "aliases": ["Health", "Status colour", "Status color"] },
+"baseline":  { "notion": "Committed Date",      "type": "date",     "aliases": ["Baseline", "Committed Date", "Committed delivery"] },
+"cd":        { "notion": "Delivery Dates",      "type": "date",     "aliases": ["Delivery window", "Delivery Dates"] },
+"discDates": { "notion": "Discovery Dates",     "type": "date",     "aliases": ["Discovery window", "Discovery date range"] },
+"discStart": { "notion": "Discovery start",     "type": "date",     "aliases": ["Discovery Start"] },
+"ipStart":   { "notion": "In Progress start",   "type": "date",     "aliases": ["In Progress Start", "Delivery start"] },
+"done":      { "notion": "Done date",           "type": "date",     "aliases": ["Done", "Completed date", "Delivered date"] },
+"desc":      { "notion": "Description",         "type": "text",     "aliases": ["Summary", "About"] },
+"update":    { "notion": "Latest Update",       "type": "text",     "aliases": ["Update", "Status update", "Progress update"] },
+"updateAt":  { "notion": "Update Last Edited",  "type": "date",     "aliases": ["Update last edited", "Last update date"] },
+"parent":    { "notion": "Parent item",         "type": "relation", "aliases": ["Parent", "Parent initiative"] }
+},
+"_swimlaneMapNote": "Maps a raw (lowercased) swimlane option to a canonical lane key, so a rename in Notion does not lose initiatives. Exact case-insensitive matches to a lane key below are handled automatically; only list genuine synonyms here.",
+"swimlaneMap": {
+"growth": "Growth",
+"platform work": "Platform",
+"foundation": "Foundations",
+"keep the lights on": "Run"
+},
+"_ragMapNote": "Maps a raw (lowercased) RAG value to a canonical bucket. Covers emoji and likely text equivalents, so the view survives RAG being retyped from emoji to words.",
+"ragMap": {
+"🟢": "green", "green": "green", "on track": "green", "g": "green",
+"🟠": "amber", "amber": "amber", "at risk": "amber", "a": "amber", "yellow": "amber",
+"🔴": "red", "red": "red", "off track": "red", "r": "red",
+"🔵": "blue", "blue": "blue", "complete": "blue", "completed": "blue", "done": "blue"
+},
+"_excludeStatusNote": "The Swimlane tag is the roadmap's inclusion filter — untagged initiatives never appear, so status does not have to do that job. Only 'Discarded' is dropped outright. Deliberately-tagged Done/Measure items stay visible and drop off once they fall outside the rolling window. Add 'Done'/'Measure' here to hide completed work regardless of window.",
+"excludeStatus": ["Discarded"],
+"unmappedLane": "Unmapped",
+"_baselineTrustNote": "A committed date is only a commitment if it was set for THIS initiative. Duplicating a sub-item in Notion copies its committed date, so the copy carries a date it never committed to and would otherwise draw a large, meaningless drift badge. These rules decide when a committed date is NOT trustworthy. The value is never deleted — it is kept, explained on hover, and counted in the data-quality note — but the drift treatment is suppressed. Set a rule to false to stop applying it.",
+"baselineTrust": {
+"ignoreBeforeDeliveryStart": true,
+"ignoreSharedWithParent": true,
+"ignoreSharedWithSiblings": true
+},
+"_lanesNote": "Lane order (top-to-bottom), colours and background tints. Echoed into the API payload so the front-end renders lanes from here — one place to change order and colour. 'optional' lanes are only drawn when they contain initiatives. Rename these to match your own swimlane options.",
+"lanes": [
+{ "key": "Growth",      "color": "#C2255C", "bg": "#FCE7F0" },
+{ "key": "Platform",    "color": "#1F9D57", "bg": "#E6F6EC" },
+{ "key": "Foundations", "color": "#C9740A", "bg": "#FBEEDC" },
+{ "key": "Run",         "color": "#2563C9", "bg": "#E7EFFC", "optional": true },
+{ "key": "Unmapped",    "color": "#6B7280", "bg": "#EEF0F2", "optional": true }
+]
+};
+function require(p){
+if (p === "./mapping.json") return MAPPING;
+throw new Error("unexpected require: " + p);
+}
+function fetch(){ throw new Error("this page never calls Notion directly"); }
+const MAP = require("./mapping.json");
+const TOKEN          = process.env.NOTION_TOKEN;
+const DATA_SOURCE_ID = process.env.DATA_SOURCE_ID || MAP.dataSourceId;
+const NOTION_VERSION = MAP.notionVersion || "2025-09-03";
+const CACHE_MS = 60000;
+let _cache = null, _cacheAt = 0, _lastGood = null;
+function readText(prop) {
+if (!prop || typeof prop !== "object") return null;
+if (Array.isArray(prop.title))     return prop.title.map(t => t.plain_text).join("") || null;
+if (Array.isArray(prop.rich_text)) return prop.rich_text.map(t => t.plain_text).join("") || null;
+if (prop.select)  return prop.select.name || null;
+if (prop.status)  return prop.status.name || null;
+if (prop.formula) return prop.formula.string != null ? prop.formula.string
+: (prop.formula.number != null ? String(prop.formula.number) : null);
+if (typeof prop.number === "number") return String(prop.number);
+if (typeof prop.checkbox === "boolean") return prop.checkbox ? "true" : "false";
+return null;
+}
+function readMulti(prop) {
+if (!prop || typeof prop !== "object") return [];
+if (Array.isArray(prop.multi_select)) return prop.multi_select.map(o => o.name);
+if (prop.select && prop.select.name)  return [prop.select.name];
+return [];
+}
+function readDate(prop) {
+if (!prop || typeof prop !== "object") return { start: null, end: null };
+const d = prop.date || (prop.formula && prop.formula.date) || null;
+return d ? { start: d.start || null, end: d.end || null } : { start: null, end: null };
+}
+function normId(id) {
+return id ? String(id).replace(/-/g, "").toLowerCase() : null;
+}
+function readRelation(prop) {
+if (!prop || typeof prop !== "object") return [];
+if (Array.isArray(prop.relation)) return prop.relation.map(r => normId(r && r.id)).filter(Boolean);
+return [];
+}
+function dayOf(v) {
+return v ? String(v).slice(0, 10) : null;
+}
+function findProp(props, field) {
+if (props[field.notion] !== undefined) return props[field.notion];
+for (const a of (field.aliases || [])) if (props[a] !== undefined) return props[a];
+return undefined;
+}
+function canonicalSwimlane(raw) {
+if (raw == null || raw === "") return { lane: null };              // untagged → not on the roadmap
+const key = String(raw).trim().toLowerCase();
+if (MAP.swimlaneMap && MAP.swimlaneMap[key]) return { lane: MAP.swimlaneMap[key] };
+const hit = MAP.lanes.find(l => l.key.toLowerCase() === key);
+if (hit) return { lane: hit.key };
+return { lane: MAP.unmappedLane, unknown: String(raw).trim() };    // tagged, but unknown lane
+}
+function canonicalRag(raw) {
+if (raw == null || raw === "") return { rag: null };
+const key = String(raw).trim().toLowerCase();
+if (MAP.ragMap && MAP.ragMap[key]) return { rag: MAP.ragMap[key] };
+return { rag: null, unknown: String(raw).trim() };
+}
+function reviewBaselines(rows) {
+const rules = MAP.baselineTrust || {};
+const byId = {};
+for (const r of rows) if (r.id) byId[r.id] = r;
+const siblings = {};
+for (const r of rows) {
+if (r.parent_id && byId[r.parent_id]) (siblings[r.parent_id] = siblings[r.parent_id] || []).push(r);
+}
+for (const r of rows) {
+r.baseline_ignored = null;
+const base = dayOf(r.baseline);
+if (!base) continue;
+const cdStart = dayOf(r.cd_start), cdEnd = dayOf(r.cd_end);
+const isWindow = cdStart && cdEnd && cdEnd > cdStart;
+const delStart = isWindow ? cdStart : (dayOf(r.ip_start) || cdStart);
+const parent = r.parent_id ? byId[r.parent_id] : null;
+let reason = null;
+if (rules.ignoreBeforeDeliveryStart && delStart && base < delStart) {
+reason = "precedes-delivery-start";
+}
+if (!reason && rules.ignoreSharedWithParent && parent && dayOf(parent.baseline) === base) {
+reason = "copied-from-parent";
+}
+if (!reason && rules.ignoreSharedWithSiblings && parent) {
+const twins = (siblings[r.parent_id] || []).filter(s => s !== r && dayOf(s.baseline) === base);
+if (twins.length) reason = "copied-between-sub-items";
+}
+r.baseline_ignored = reason;
+}
+return rows;
+}
+function adapt(pages) {
+const F = MAP.fields;
+const seen = {};
+Object.keys(F).forEach(k => (seen[k] = false));
+const unknownLane = {}, unknownRag = {};
+let noName = 0;
+const results = [];
+for (const page of (pages || [])) {
+const props = (page && page.properties) || {};
+const url = page && page.url;   // the initiative's Notion page URL (click-through target)
+const get = (k) => { const p = findProp(props, F[k]); if (p !== undefined) seen[k] = true; return p; };
+const statusRaw = readText(get("status"));
+const swRaw = readText(get("swimlane"));
+const ragRaw = readText(get("rag"));
+const name = readText(get("name"));
+const cd = readDate(get("cd"));
+const discRange = readDate(get("discDates"));
+const disc = readDate(get("discStart"));
+const ip = readDate(get("ipStart"));
+const done = readDate(get("done"));      // when it left In Progress; orders the Measure list
+const base = readDate(get("baseline"));
+const desc = readText(get("desc"));       // Notion-AI summary of what this initiative IS
+const update = readText(get("update"));
+const updateAt = readDate(get("updateAt"));
+const parent = readRelation(get("parent"));
+if (MAP.excludeStatus.includes(statusRaw)) continue;
+const sw = canonicalSwimlane(swRaw);
+if (sw.lane == null) continue;
+if (sw.unknown) unknownLane[sw.unknown] = (unknownLane[sw.unknown] || 0) + 1;
+const rg = canonicalRag(ragRaw);
+if (rg.unknown) unknownRag[rg.unknown] = (unknownRag[rg.unknown] || 0) + 1;
+if (!name) noName++;
+results.push({
+"Initiative Name": name || "(untitled)",
+swimlane: sw.lane,
+Status: statusRaw,
+RAG: rg.rag,
+baseline: base.start,   // committed landing date (single date; frozen when set)
+url: url || null,
+id: normId(page && page.id),          // used to match sub-items to their parent
+parent_id: parent[0] || null,         // "Parent item" is limited to one in Notion
+cd_start: cd.start,
+cd_end: cd.end,
+disc_start: discRange.start || disc.start,   // prefer the "Discovery Dates" range
+disc_end: discRange.end,                     // real discovery end, when it's set
+ip_start: ip.start,
+done_date: done.start,
+description: desc,                           // "what is this" — leads the detail card
+update: update,                              // Latest Update narrative (how it is going)
+update_at: updateAt.start,
+});
+}
+reviewBaselines(results);
+const warnings = [];
+if (pages && pages.length) {
+for (const k of Object.keys(F)) {
+if (!seen[k]) warnings.push(
+`Field "${k}" (Notion property "${F[k].notion}") wasn't found on any initiative. ` +
+`If it was renamed, update its "notion" name or add an alias in mapping.json.`);
+}
+}
+for (const [v, n] of Object.entries(unknownLane))
+warnings.push(`${n} initiative${n > 1 ? "s" : ""} tagged "${v}" don't match a known lane — shown under "${MAP.unmappedLane}". Add "${v}" to mapping.json to place them.`);
+for (const [v, n] of Object.entries(unknownRag))
+warnings.push(`${n} initiative${n > 1 ? "s" : ""} have an unrecognised RAG value "${v}" — shown as "not set". Add it to ragMap in mapping.json.`);
+if (noName) warnings.push(`${noName} initiative${noName > 1 ? "s" : ""} have no name.`);
+if (pages && pages.length && !results.length)
+warnings.push(`No initiatives could be placed on the roadmap. Check the swimlane field in Notion against mapping.json.`);
+return { results, warnings };
+}
+async function fetchInitiatives() {
+if (!TOKEN) {
+const err = new Error("Missing NOTION_TOKEN environment variable");
+err.status = 500;
+throw err;
+}
+if (_cache && Date.now() - _cacheAt < CACHE_MS) return _cache;
+const pages = [];
+let cursor;
+do {
+const body = { page_size: 100 };
+if (cursor) body.start_cursor = cursor;
+const resp = await fetch(`https://api.notion.com/v1/data_sources/${DATA_SOURCE_ID}/query`, {
+method: "POST",
+headers: {
+Authorization: `Bearer ${TOKEN}`,
+"Notion-Version": NOTION_VERSION,
+"Content-Type": "application/json",
+},
+body: JSON.stringify(body),
+});
+if (!resp.ok) {
+const detail = await resp.text();
+if (_lastGood) {
+return { ..._lastGood, stale: true,
+warnings: [`Live refresh failed (Notion ${resp.status}); showing the last good data.`, ...(_lastGood.warnings || [])] };
+}
+const err = new Error(`Notion API error ${resp.status}: ${detail}`);
+err.status = resp.status;
+throw err;
+}
+const data = await resp.json();
+if (Array.isArray(data.results)) pages.push(...data.results);
+cursor = data.has_more ? data.next_cursor : undefined;
+} while (cursor);
+const { results, warnings } = adapt(pages);
+const payload = { results, warnings, lanes: MAP.lanes, generated_at: new Date().toISOString() };
+_cache = payload;
+_cacheAt = Date.now();
+_lastGood = payload;
+return payload;
+}
+return { adapt: adapt, reviewBaselines: reviewBaselines, mapping: MAP };
+})();
+function idFromUrl(url) {
+if (!url) return null;
+var m = String(url).match(/([0-9a-fA-F]{32})(?:[?#].*)?$/);
+return m ? m[1].toLowerCase() : null;
+}
+function pageUrl(url) {
+var id = idFromUrl(url);
+return id ? "https://app.notion.com/p/" + id : (url || null);
+}
+function txt(v)  { return v == null || v === "" ? { rich_text: [] } : { rich_text: [{ plain_text: String(v) }] }; }
+function ttl(v)  { return v == null || v === "" ? { title: [] }     : { title: [{ plain_text: String(v) }] }; }
+function sel(v)  { return v == null || v === "" ? { select: null }  : { select: { name: String(v) } }; }
+function stat(v) { return v == null || v === "" ? { status: null }  : { status: { name: String(v) } }; }
+function date(s, e) {
+if (s == null && e == null) return { date: null };
+return { date: { start: s || null, end: e || null } };
+}
+function relation(v) {
+var arr = v;
+if (typeof v === "string") {
+try { arr = JSON.parse(v); } catch (e) { return { relation: [] }; }
+}
+if (!Array.isArray(arr)) return { relation: [] };
+return {
+relation: arr.map(function (u) {
+var id = idFromUrl(typeof u === "string" ? u : (u && u.url));
+return id ? { id: id } : null;
+}).filter(Boolean)
+};
+}
+function sqlRowToPage(r) {
+if (!r || typeof r !== "object") r = {};
+return {
+id: idFromUrl(r.url),
+url: pageUrl(r.url),
+properties: {
+"Initiative Name":        ttl(r.name),
+"Swimlane":            sel(r.lane),
+"Status":                 stat(r.status),
+"RAG":                    sel(r.rag),
+"Committed Date": date(r.baseline, null),
+"Delivery Dates": date(r.cd_start, r.cd_end),
+"Discovery Dates":        date(r.disc_start, r.disc_end),
+"Discovery start":        date(r.disc_legacy, null),
+"In Progress start":      date(r.ip_start, null),
+"Done date":              date(r.done_date, null),
+"Description":            txt(r.description),
+"Latest Update":             txt(r.latest_update != null ? r.latest_update : r.update),
+"Update Last Edited": date(r.update_at, null),
+"Parent item":            relation(r.parent)
+}
+};
+}
+function sqlRowsToPages(rows) {
+return (Array.isArray(rows) ? rows : []).map(sqlRowToPage);
+}
+function applyLanes(){
+if (ADAPTER.mapping && ADAPTER.mapping.lanes && ADAPTER.mapping.lanes.length) {
+LANES = ADAPTER.mapping.lanes;
+}
+}
+function paint(rows, stampIso, badgeClass, badgeText, stampPrefix){
+var out = ADAPTER.adapt(sqlRowsToPages(rows));
+applyLanes();
+showWarnings(out.warnings);
+render(out.results);
+renderMeasuring(out.results);
+var b = document.getElementById("src");
+if (b) { b.className = "badge " + badgeClass; b.textContent = badgeText; }
+setStamp(stampIso, stampPrefix);
+return out;
+}
+function state(title, detail){
+var g = document.getElementById("grid");
+if (!g) return;
+g.innerHTML = "";
+var wrap = document.createElement("div");
+wrap.style.cssText = "padding:26px 18px;font-size:12.5px;color:#4b5563;line-height:1.6;max-width:640px";
+var h = document.createElement("div");
+h.style.cssText = "font-weight:700;color:#1f2430;margin-bottom:4px";
+h.textContent = title;
+var d = document.createElement("div");
+d.textContent = detail || "";
+wrap.appendChild(h);
+wrap.appendChild(d);
+g.appendChild(wrap);
+}</script>
+
+<script>/* Claude replaces the two markers below. Nothing else in this file should be edited. */
+var ROWS = /*__ROWS__*/[];
+var GENERATED_AT = /*__GENERATED_AT__*/null;
+(function(){
+try {
+if (!ROWS.length) {
+state("This snapshot came out empty.",
+"No initiatives were returned when it was generated, so there is nothing to "
++ "show. Ask for a fresh one rather than reading this as an empty roadmap.");
+return;
+}
+paint(ROWS, GENERATED_AT, "snap", "Snapshot", "data as of");
+} catch (e) {
+state("Could not build this snapshot.", String(e && e.message ? e.message : e));
+}
+})();</script>
+</body>
+</html>
